@@ -1,20 +1,45 @@
 # AI Investment Research Agent
+---
+
+## What It Does
+
+Enter any publicly listed company name. The agent runs a **7-node research pipeline**, fetches real financial data, analyzes news sentiment, identifies risks with evidence, and delivers a clear investment verdict — **INVEST**, **CONSIDER**, or **PASS** — with transparent, explainable reasoning behind every decision.
+
+Every score is justified with a specific rationale. No black-box LLM verdicts.
 
 ---
 
-## Overview
+## Live Demo
 
-The AI Investment Research Agent takes any publicly listed company name as input, runs it through a 7-node sequential agent pipeline, and delivers an investment verdict — **INVEST**, **CONSIDER**, or **PASS** — with transparent, explainable reasoning behind every decision.
+🔗 **[View Live →](https://your-vercel-url.vercel.app)**
 
-The agent fetches real financial data from Yahoo Finance, analyzes recent news sentiment via NewsAPI, identifies evidence-based risks, calculates a deterministic score across six weighted factors, and generates a structured equity research report — streamed live to the UI as each agent node completes.
+---
 
-**Key differentiators:**
-- Scoring is fully deterministic — no LLM decides the score, every point is justified with a specific rationale and benchmark comparison
-- Real financial data from Yahoo Finance — no hallucinated numbers
-- News is filtered for relevance and classified by sentiment per article
-- Risks include evidence, impact rating, and probability
-- Agent workflow is visible in real time as each node completes via SSE streaming
-- Recommendation includes a confidence score and an investment checklist
+## Features
+
+- **7-Node Agent Pipeline** — Research → Financial → News → Risk → Scoring → Decision → Report
+- **Real Financial Data** — Fetched live from Yahoo Finance (revenue, margins, P/E, debt, FCF)
+- **Deterministic Scoring** — 6 weighted factors totaling 100 points, no LLM decides the score
+- **Explainable Score** — Every factor shows why it got that score with benchmark comparisons
+- **News Sentiment** — Per-article classification into positive, negative, or neutral
+- **Evidence-Based Risks** — Each risk includes evidence, impact rating, and probability
+- **Live Agent Workflow** — See each node complete in real time via SSE streaming
+- **Confidence Score** — Derived from investment score, shown alongside the verdict
+- **Auto Model Fallback** — If Groq rate limits, automatically retries across 4 models
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 15, React, TypeScript, Tailwind CSS |
+| Backend | Next.js API Routes (App Router) |
+| LLM | Groq — Llama 3.3 70B |
+| Financial Data | Yahoo Finance public API |
+| News | NewsAPI |
+| Streaming | Server-Sent Events (SSE) |
+| Deployment | Vercel |
 
 ---
 
@@ -24,30 +49,36 @@ The agent fetches real financial data from Yahoo Finance, analyzes recent news s
 - Node.js 18+
 - npm
 
-### Setup
+### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/ai-investment-agent
-cd ai-investment-agent
+git clone https://github.com/Shivanshu0729/AI-Investment-Research-Agent.git
+cd AI-Investment-Research-Agent
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-### Environment Variables
+### 3. Set up environment variables
 
 Create a `.env.local` file in the root:
 
-```
+```env
 GROQ_API_KEY=your_groq_api_key
 NEWS_API_KEY=your_newsapi_key
 ```
 
-**Where to get free API keys:**
-- **Groq**: https://console.groq.com — free, no credit card required
-- **NewsAPI**: https://newsapi.org/register — free tier, 100 requests/day
+| Key | Where to get it | Cost |
+|-----|----------------|------|
+| `GROQ_API_KEY` | https://console.groq.com | Free |
+| `NEWS_API_KEY` | https://newsapi.org/register | Free |
 
-> Financial data is fetched directly from Yahoo Finance's public API — no key required.
+> **Financial data** is fetched directly from Yahoo Finance — no API key required.
 
-### Run Locally
+### 4. Run locally
 
 ```bash
 npm run dev
@@ -61,112 +92,90 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Architecture
 
-Built on **Next.js 15** (App Router) with a sequential agent pipeline on the backend and a React frontend that streams agent progress in real time via **Server-Sent Events (SSE)**.
-
 ```
 User Input (Company Name)
         │
         ▼
-┌──────────────────────────────────────────────────┐
-│              Agent Pipeline                       │
-│                                                   │
-│  ResearchAgent → FinancialAgent → NewsAgent       │
-│       → RiskAgent → ScoringAgent                  │
-│           → DecisionAgent → ReportAgent           │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                  Agent Pipeline                      │
+│                                                      │
+│  ResearchAgent → FinancialAgent → NewsAgent          │
+│       → RiskAgent → ScoringAgent                     │
+│            → DecisionAgent → ReportAgent             │
+└─────────────────────────────────────────────────────┘
         │
         ▼
    SSE Stream → React Frontend → Live Dashboard
 ```
 
-### Agent Pipeline (7 Nodes)
+### Agent Nodes
 
-| Node | What it does |
-|------|-------------|
+| Node | Responsibility |
+|------|---------------|
 | **Research Agent** | Resolves company name to ticker via Yahoo Finance search, fetches company profile |
 | **Financial Agent** | Fetches income statement, key ratios, and cash flow from Yahoo Finance |
-| **News Agent** | Fetches recent news via NewsAPI, filters irrelevant articles, classifies per-article sentiment |
-| **Risk Agent** | Uses Groq LLM to identify 4 risks — each with evidence, impact rating, and probability |
-| **Scoring Agent** | Deterministic scoring across 6 weighted factors — no LLM involved in the score |
-| **Decision Agent** | Generates an objective third-person investment rationale using Groq |
+| **News Agent** | Fetches recent articles via NewsAPI, filters irrelevant content, classifies per-article sentiment |
+| **Risk Agent** | Identifies 4 risks via Groq LLM — each with evidence, impact, and probability |
+| **Scoring Agent** | Deterministic scoring across 6 weighted factors — no LLM involved |
+| **Decision Agent** | Generates objective third-person investment rationale |
 | **Report Agent** | Generates a structured markdown equity research report |
 
 ### Scoring System
 
-The investment score is calculated deterministically across six factors totaling 100 points:
-
 | Factor | Weight | What is measured |
 |--------|--------|-----------------|
-| Revenue Growth | 20pts | YoY revenue growth benchmarked against sector median |
-| Profitability | 20pts | Net margin compared to industry averages |
+| Revenue Growth | 20pts | YoY revenue growth vs sector median |
+| Profitability | 20pts | Net margin vs industry average |
 | Debt Level | 15pts | Debt-to-equity ratio |
-| News Sentiment | 20pts | Ratio of positive to negative classified articles |
+| News Sentiment | 20pts | Ratio of positive to negative articles |
 | Market Position | 15pts | Market cap tier |
-| Risk Exposure | 10pts | Keyword severity analysis on identified risks |
+| Risk Exposure | 10pts | Severity of identified risks |
 
-**Thresholds:**
-- **INVEST**: Score ≥ 80
-- **CONSIDER**: Score 60–79  
-- **PASS**: Score < 60
+**Verdict thresholds:**
 
-Every factor shows a rationale explaining exactly why that score was given — for example: *"Revenue grew 14% YoY vs sector median ~10% → 16/20"*
-
-### Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15, React, TypeScript, Tailwind CSS |
-| Backend | Next.js API Routes (App Router) |
-| LLM | Groq — Llama 3.3 70B with automatic fallback to llama-3.1-8b-instant, gemma2-9b-it, mixtral-8x7b-32768 |
-| Financial Data | Yahoo Finance public API (no key needed) |
-| News | NewsAPI |
-| Streaming | Server-Sent Events (SSE) |
-
-### Streaming
-
-The `/api/analyze` route streams progress updates from each agent node to the frontend via SSE. The UI updates the Agent Workflow panel live as each node completes, so users see exactly what the agent is doing at every step.
-
-### LLM Fallback
-
-Groq implements automatic model fallback — if one model hits a rate limit, the request retries across three other models automatically, so the app never fails due to rate limiting.
+| Score | Verdict |
+|-------|---------|
+| ≥ 80 | INVEST |
+| 60–79 | CONSIDER |
+| < 60 | PASS |
 
 ---
 
 ## Key Decisions & Trade-offs
 
 ### Deterministic Scoring, Not LLM Scoring
-The scoring engine in `utils/scoring.ts` is pure rule-based logic. LLM-generated scores are inconsistent across runs and cannot be explained point by point. A deterministic system produces the same score for the same inputs every time and every point has a specific justification. This is closer to how real quant models work.
+The scoring engine in `utils/scoring.ts` is pure rule-based logic. LLM scores are inconsistent across runs and cannot be justified point by point. A deterministic system produces the same score for the same inputs every time — each point has a specific benchmark-based rationale.
 
-Trade-off: Weights are manually calibrated and do not automatically adapt to sector-specific norms.
+**Trade-off:** Weights are manually calibrated and do not automatically adapt to sector-specific norms.
 
 ### Sequential Pipeline
-Each node waits for the previous to complete because later nodes depend on earlier outputs — the Risk Agent needs financial analysis and news analysis, and the Scoring Agent needs sentiment-tagged articles. Parallel execution would have required more complex state management for limited gain.
+Each node waits for the previous because later nodes depend on earlier outputs — the Risk Agent needs financial and news analysis, the Scoring Agent needs sentiment-tagged articles.
 
-Trade-off: Total latency is 30–45 seconds. Parallel execution could reduce this to ~15 seconds.
+**Trade-off:** Total latency is 30–45 seconds. Parallel execution could reduce this to ~15 seconds.
 
 ### Yahoo Finance Direct API
-FMP discontinued their free v3 API in August 2025. Alpha Vantage limits free users to 25 requests per day. Yahoo Finance's public `quoteSummary` endpoint provides real-time data for every publicly listed company worldwide with no rate limits and no API key.
+FMP discontinued their free v3 API in August 2025. Alpha Vantage limits free users to 25 requests/day. Yahoo Finance's public `quoteSummary` endpoint provides real-time data for every publicly listed company worldwide with no rate limits and no API key.
 
-Trade-off: Yahoo Finance is not an officially supported public API and could change without notice. In production, a paid provider like Polygon.io would be used.
+**Trade-off:** Not an officially supported public API — could change without notice. In production, a paid provider like Polygon.io would be used.
 
 ### Groq over OpenAI
-Groq's inference is significantly faster than OpenAI for the same model size, and the free tier is sufficient for this use case. The multi-model fallback means rate limits on any single model never block a request.
+Groq's inference is significantly faster for the same model size, and the free tier is sufficient. The app implements automatic fallback across 4 models so rate limits on any single model never block a request.
 
-Trade-off: Smaller context window than GPT-4, which limits the length of financial reports.
+**Trade-off:** Smaller context window than GPT-4.
 
 ### What Was Left Out
-- **Competitor comparison** — would require multiple additional API calls per analysis
-- **Historical score tracking** — storing past analyses to track a company over time
-- **PDF export** — downloadable formatted research report
-- **Proper LangGraph StateGraph** — the pipeline mimics LangGraph's node pattern but uses a sequential loop rather than a full `StateGraph` with conditional edges
+- Competitor benchmarking — would require multiple additional API calls
+- Historical score tracking — storing past analyses over time
+- PDF export — downloadable research report
+- Full LangGraph `StateGraph` with conditional edges — currently uses a sequential loop that mimics the LangGraph node pattern
 
 ---
 
 ## Example Runs
 
-### Apple (AAPL)
+### Apple (AAPL) — INVEST
 ```
-Score: 84/100 — INVEST — Confidence: 91%
+Score: 84/100 | Confidence: 91% | Risk: Low
 
 Revenue Growth:  14/20 — Grew 2% YoY, below sector median
 Profitability:   20/20 — Net margin 24%, well above industry avg
@@ -176,29 +185,27 @@ Market Position: 15/15 — Mega-cap, dominant market leader
 Risk Exposure:   10/10 — No significant risks identified
 ```
 
-### Tesla (TSLA)
+### Tesla (TSLA) — CONSIDER
 ```
-Score: 58/100 — CONSIDER — Confidence: 78%
+Score: 58/100 | Confidence: 78% | Risk: High
 
 Revenue Growth:   6/20 — Near-flat growth of 1% YoY
 Profitability:    7/20 — Net margin 7.3%, thin
 Debt Level:      15/15 — Very low D/E of 0.08
 News Sentiment:  11/20 — Mixed, 4 positive / 3 negative
 Market Position: 15/15 — Mega-cap, dominant EV leader
-Risk Exposure:    4/10 — Multiple high-severity risks
-
-Key Risks: Competition (HIGH), Valuation at 79x P/E (HIGH), Regulatory (MEDIUM)
+Risk Exposure:    4/10 — Multiple high-severity risks flagged
 ```
 
-### NVIDIA (NVDA)
+### NVIDIA (NVDA) — INVEST
 ```
-Score: 91/100 — INVEST — Confidence: 95%
+Score: 91/100 | Confidence: 95% | Risk: Low
 
-Revenue Growth:  20/20 — Revenue grew 114% YoY
+Revenue Growth:  20/20 — Grew 114% YoY
 Profitability:   20/20 — Net margin 56%
 Debt Level:      12/15 — Manageable D/E of 0.42
 News Sentiment:  18/20 — Strongly positive AI demand coverage
-Market Position: 15/15 — Mega-cap, AI chip monopoly
+Market Position: 15/15 — Mega-cap, AI chip leader
 Risk Exposure:    6/10 — Export restriction and competition risks
 ```
 
@@ -206,31 +213,52 @@ Risk Exposure:    6/10 — Export restriction and competition risks
 
 ## What I Would Improve With More Time
 
-1. **Proper LangGraph StateGraph** — implement conditional edges so the pipeline can skip nodes or retry them based on data quality, rather than always running all 7 nodes sequentially
+1. **Full LangGraph StateGraph** — conditional edges so the pipeline can skip or retry nodes based on data quality
+2. **Competitor benchmarking** — automatically compare 2–3 competitors side by side
+3. **Sector-aware scoring** — different margin benchmarks for SaaS vs retail vs manufacturing
+4. **Historical score tracking** — store analyses and show how a company's score changes over time
+5. **PDF export** — downloadable equity research note
+6. **International calibration** — scoring benchmarks adjusted for Indian and European market norms
 
-2. **Competitor benchmarking** — automatically identify 2–3 competitors and compare key metrics side by side — the single biggest upgrade to research quality
+---
 
-3. **Sector-aware scoring** — current weights are generic across all industries; a SaaS company and a retailer need different margin benchmarks
+## Project Structure
 
-4. **Historical score tracking** — store analyses in a database and show how a company's investment score has changed over time
-
-5. **PDF export** — downloadable research report formatted like an actual equity research note
-
-6. **International stock calibration** — Yahoo Finance handles global tickers but the scoring benchmarks are calibrated for US markets; Indian and European companies need different baseline comparisons
+```
+AI-Investment-Research-Agent/
+├── app/
+│   ├── page.tsx                    # Main UI with SSE stream handling
+│   ├── layout.tsx                  # Root layout
+│   └── api/analyze/route.ts        # SSE streaming endpoint
+├── agents/                         # Pipeline nodes
+│   ├── researchAgent.ts
+│   ├── financialAgent.ts
+│   ├── newsAgent.ts
+│   ├── riskAgent.ts
+│   ├── scoringAgent.ts
+│   ├── decisionAgent.ts
+│   └── reportAgent.ts
+├── components/                     # React UI components
+├── graph/investmentGraph.ts        # Pipeline orchestration
+├── services/                       # External API clients
+│   ├── groq.ts                     # Groq LLM with model fallback
+│   ├── financialApi.ts             # Yahoo Finance
+│   └── newsApi.ts                  # NewsAPI
+├── prompts/                        # LLM prompt templates
+├── types/InvestmentState.ts        # TypeScript state interface
+├── utils/
+│   ├── scoring.ts                  # Deterministic scoring engine
+│   └── tickerResolver.ts           # Company name to ticker resolver
+└── docs/
+    └── llm-conversations.md        # LLM chat logs used while building
+```
 
 ---
 
 ## LLM Chat Logs
 
-All conversations used while building this project are in:
-
-```
-docs/llm-conversations.md
-```
-
-This includes every session used to scaffold the architecture, generate component code, debug errors, and refine the UI — from initial setup through final polish.
+All AI conversations used while building this project are saved in `docs/llm-conversations.md` — including architecture decisions, code generation, debugging sessions, and UI refinements.
 
 ---
 
-*Built by Shivanshu Gangwar*#   A I - I n v e s t m e n t - R e s e a r c h - A g e n t  
- 
+*Built by Shivanshu Gangwar*
