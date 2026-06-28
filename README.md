@@ -9,12 +9,6 @@ Every score is justified with a specific rationale. No black-box LLM verdicts.
 
 ---
 
-## Live Demo
-
-🔗 **[View Live →](https://your-vercel-url.vercel.app)**
-
----
-
 ## Features
 
 - **7-Node Agent Pipeline** — Research → Financial → News → Risk → Scoring → Decision → Report
