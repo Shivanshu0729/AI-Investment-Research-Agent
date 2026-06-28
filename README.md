@@ -71,21 +71,11 @@ GROQ_API_KEY=your_groq_api_key
 NEWS_API_KEY=your_newsapi_key
 ```
 
-| Key | Where to get it | Cost |
-|-----|----------------|------|
-| `GROQ_API_KEY` | https://console.groq.com | Free |
-| `NEWS_API_KEY` | https://newsapi.org/register | Free |
-
-> **Financial data** is fetched directly from Yahoo Finance — no API key required.
-
 ### 4. Run locally
 
 ```bash
 npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000)
-
 ---
 
 ## How It Works
